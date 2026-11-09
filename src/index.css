@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-pixel: 'Silkscreen', monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #FAF8F5;
+    color: #1C1917;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-mono-telemetry {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+@keyframes heatPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 68, 0, 0.72))
+            drop-shadow(0 0 24px rgba(255, 136, 0, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(255, 92, 0, 0.92))
+            drop-shadow(0 0 34px rgba(255, 42, 0, 0.65));
+  }
+}
+
+@keyframes frostShimmer {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.55))
+            drop-shadow(0 0 18px rgba(224, 242, 254, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(186, 230, 253, 0.8))
+            drop-shadow(0 0 24px rgba(125, 211, 252, 0.65));
+  }
+}
+
+@keyframes brushSweep {
+  0% {
+    transform: translate(-24px, -24px) rotate(-18deg) scale(0.85);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    transform: translate(110px, 95px) rotate(14deg) scale(1.08);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(175px, 145px) rotate(26deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-heat-aura {
+  animation: heatPulse 2.1s ease-in-out infinite;
+}
+
+.animate-frost-aura {
+  animation: frostShimmer 3.6s ease-in-out infinite;
+}
+
+.animate-brush-sweep {
+  animation: brushSweep 0.56s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Custom sleek scrollbars inside windows & code viewers */
+.window-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.window-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.window-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 130, 0.28);
+  border-radius: 9999px;
+}
+
+.window-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 130, 0.45);
+}
