@@ -19,6 +19,7 @@ struct table g_windows;
 
 extern void cobweb_menubar_init(void);
 extern void cobweb_menubar_run(void);
+extern void cobweb_load_prefs(void);
 
 static TABLE_HASH_FUNC(hash_windows) { return *(uint32_t *)key; }
 static TABLE_COMPARE_FUNC(cmp_windows) {
@@ -54,11 +55,13 @@ int main(int argc, char **argv) {
 
   ax_check_trust(true);
 
+  // Saved preferences apply in --no-menu mode too; explicit CLI flags
+  // still win below.
+  cobweb_load_prefs();
+
   if (!no_menu)
     cobweb_menubar_init();
 
-  // Explicit CLI flags win over saved menu-bar preferences: cobweb_load_prefs
-  // runs inside cobweb_menubar_init and would otherwise clobber them.
   if (cli_pixel)
     g_diegetic_style = DIEGETIC_STYLE_PIXEL;
   if (cli_minutes > 0.0f)

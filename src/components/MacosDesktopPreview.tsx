@@ -622,7 +622,7 @@ export const MacosDesktopPreview: React.FC = () => {
                 top: w.y,
                 width: w.w,
                 height: w.h,
-                zIndex: w.z - minZ + 1,
+                zIndex: Math.min(39, w.z - minZ + 1),
               }}
               className={
                 phys.heatIntensity > 0.2
@@ -696,10 +696,14 @@ export const MacosDesktopPreview: React.FC = () => {
                   onPointerMove={(e) => {
                     if (!dragRef.current || dragRef.current.id !== w.id || e.buttons === 0)
                       return;
+                    // Pointer deltas arrive in screen px; the stage layer is
+                    // scaled on narrow viewports, so convert back to design px.
+                    const dx = (e.clientX - dragRef.current.sx) / stageScale;
+                    const dy = (e.clientY - dragRef.current.sy) / stageScale;
                     const maxW = layerRef.current ? layerRef.current.clientWidth - w.w - 12 : 420;
                     const maxH = layerRef.current ? layerRef.current.clientHeight - w.h - 12 : 240;
-                    const nx = Math.max(12, Math.min(maxW, dragRef.current.ox + (e.clientX - dragRef.current.sx)));
-                    const ny = Math.max(34, Math.min(maxH, dragRef.current.oy + (e.clientY - dragRef.current.sy)));
+                    const nx = Math.max(12, Math.min(maxW, dragRef.current.ox + dx));
+                    const ny = Math.max(34, Math.min(maxH, dragRef.current.oy + dy));
                     setWindows((prev) =>
                       prev.map((item) => (item.id === w.id ? { ...item, x: nx, y: ny } : item))
                     );

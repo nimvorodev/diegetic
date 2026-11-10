@@ -170,7 +170,15 @@ void windows_tick_animations(struct table *windows) {
   for (uint32_t i = 0; i < windows->capacity; i++) {
     for (struct bucket *b = windows->buckets[i]; b; b = b->next) {
       struct border *border = b->value;
-      if (!border || !border->visible)
+      if (!border)
+        continue;
+      if (border->resize_suppressed) {
+        // Re-check the settle deadline: after a live resize ends, no other
+        // event is guaranteed to arrive, so this is what un-hides the border.
+        border_update(border);
+        continue;
+      }
+      if (!border->visible)
         continue;
       telemetry_update_window(&border->telemetry, border->owner_pid, now);
       if (telemetry_needs_animation(&border->telemetry, now)) {

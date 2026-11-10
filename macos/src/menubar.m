@@ -79,34 +79,36 @@ static void cobweb_save_prefs(void) {
   [d setObject:g_app_exceptions.allObjects ?: @[] forKey:@"appExceptions"];
 }
 
-static void cobweb_load_prefs(void) {
-  NSUserDefaults *d = NSUserDefaults.standardUserDefaults;
-  [d registerDefaults:@{
-    @"enabled" : @YES,
-    @"style" : @(DIEGETIC_STYLE_ORGANIC),
-    @"cobwebAfterSeconds" : @7200.0f,
-    @"borderWidth" : @14.0f,
-    @"appsOnByDefault" : @YES,
-    @"appExceptions" : @[]
-  }];
+void cobweb_load_prefs(void) {
+  @autoreleasepool {
+    NSUserDefaults *d = NSUserDefaults.standardUserDefaults;
+    [d registerDefaults:@{
+      @"enabled" : @YES,
+      @"style" : @(DIEGETIC_STYLE_ORGANIC),
+      @"cobwebAfterSeconds" : @7200.0f,
+      @"borderWidth" : @14.0f,
+      @"appsOnByDefault" : @YES,
+      @"appExceptions" : @[]
+    }];
 
-  g_diegetic_enabled = [d boolForKey:@"enabled"];
-  NSInteger st = [d integerForKey:@"style"];
-  g_diegetic_style = (st == DIEGETIC_STYLE_PIXEL) ? DIEGETIC_STYLE_PIXEL
-                                                  : DIEGETIC_STYLE_ORGANIC;
-  float delay = [d floatForKey:@"cobwebAfterSeconds"];
-  if (delay >= 60.0f && delay <= 86400.0f)
-    g_cobweb_after_seconds = delay;
-  float bw = [d floatForKey:@"borderWidth"];
-  if (bw >= 6.0f && bw <= 32.0f)
-    g_border_width = bw;
+    g_diegetic_enabled = [d boolForKey:@"enabled"];
+    NSInteger st = [d integerForKey:@"style"];
+    g_diegetic_style = (st == DIEGETIC_STYLE_PIXEL) ? DIEGETIC_STYLE_PIXEL
+                                                    : DIEGETIC_STYLE_ORGANIC;
+    float delay = [d floatForKey:@"cobwebAfterSeconds"];
+    if (delay >= 60.0f && delay <= 86400.0f)
+      g_cobweb_after_seconds = delay;
+    float bw = [d floatForKey:@"borderWidth"];
+    if (bw >= 6.0f && bw <= 32.0f)
+      g_border_width = bw;
 
-  g_apps_on_by_default = [d boolForKey:@"appsOnByDefault"];
-  g_app_exceptions = [NSMutableSet set];
-  NSArray *saved = [d arrayForKey:@"appExceptions"];
-  for (id item in saved) {
-    if ([item isKindOfClass:NSString.class])
-      [g_app_exceptions addObject:item];
+    g_apps_on_by_default = [d boolForKey:@"appsOnByDefault"];
+    g_app_exceptions = [NSMutableSet set];
+    NSArray *saved = [d arrayForKey:@"appExceptions"];
+    for (id item in saved) {
+      if ([item isKindOfClass:NSString.class])
+        [g_app_exceptions addObject:item];
+    }
   }
 }
 
@@ -419,7 +421,6 @@ void cobweb_menubar_init(void) {
   @autoreleasepool {
     [NSApplication.sharedApplication
         setActivationPolicy:NSApplicationActivationPolicyAccessory];
-    cobweb_load_prefs();
   }
 }
 

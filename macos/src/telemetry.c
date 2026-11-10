@@ -129,6 +129,10 @@ void telemetry_update_window(struct window_telemetry *wt, pid_t pid,
     wt->cobweb_intensity = 0.0f;
     wt->heat_intensity = 0.0f;
     wt->frost_intensity = 0.0f;
+    // Freeze the neglect clocks while paused, otherwise unpausing after a
+    // long pause instantly maxes cobwebs and frost on every window.
+    wt->unfocused_since = now;
+    wt->idle_since = now;
     return;
   }
 
@@ -200,7 +204,9 @@ bool telemetry_needs_animation(const struct window_telemetry *wt,
                                CFAbsoluteTime now) {
   if (!g_diegetic_enabled)
     return false;
-  if (now < wt->brush_until)
+  // Grace window past brush_until so one more frame is drawn with
+  // is_brushing false — it clears the last in-flight silk particles.
+  if (now < wt->brush_until + 0.15f)
     return true;
   if (wt->heat_intensity > 0.02f)
     return true;

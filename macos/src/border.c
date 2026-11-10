@@ -106,6 +106,12 @@ static bool border_suppress_live_resize(struct border *border, CGRect bounds) {
 
 static void border_update_internal(struct border *border,
                                    const CGRect *observed_bounds) {
+  if (!g_diegetic_enabled) {
+    // Paused: hide instead of drawing — otherwise the last frame stays
+    // frozen on screen and later reorders would pop it back in.
+    border_hide(border);
+    return;
+  }
   if (border->resize_suppressed)
     return;
   border->geometry_valid = false;
@@ -142,6 +148,14 @@ static void border_update_internal(struct border *border,
   }
   if (!border->wid || !border->context)
     return;
+
+  // Sticky (all-spaces) targets need the overlay itself tagged sticky,
+  // otherwise it stays on one space while the target shows on all of them.
+  uint64_t sticky_tag = WINDOW_TAG_STICKY;
+  if (border->sticky)
+    SLSSetWindowTags(cid, border->wid, &sticky_tag, 64);
+  else
+    SLSClearWindowTags(cid, border->wid, &sticky_tag, 64);
 
   if (!CGRectEqualToRect(frame, border->frame))
     border->needs_redraw = true;
@@ -292,8 +306,8 @@ void border_update(struct border *border) {
 
 void border_reorder(struct border *border) {
   pthread_mutex_lock(&border->mutex);
-  if (border->resize_suppressed || !border->wid || !border->context ||
-      border->too_small ||
+  if (!g_diegetic_enabled || border->resize_suppressed || !border->wid ||
+      !border->context || border->too_small ||
       (!border->sticky && !is_space_visible(border->cid, border->sid))) {
     pthread_mutex_unlock(&border->mutex);
     return;
@@ -337,7 +351,7 @@ void border_hide(struct border *border) {
 
 void border_unhide(struct border *border) {
   pthread_mutex_lock(&border->mutex);
-  if (border->resize_suppressed || border->too_small ||
+  if (!g_diegetic_enabled || border->resize_suppressed || border->too_small ||
       (!border->sticky && !is_space_visible(border->cid, border->sid))) {
     pthread_mutex_unlock(&border->mutex);
     return;
