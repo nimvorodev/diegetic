@@ -70,6 +70,12 @@ export interface ComputedPhysicalState {
   hasSpider: boolean;
 }
 
+// Combined thermal load: CPU% * 0.78 + (RAM_GB * 4.5), igniting at >= 54
+export const HEAT_IGNITION_LOAD = 54;
+export function effectiveLoad(cpu: number, ramGb: number): number {
+  return cpu * 0.78 + ramGb * 4.5;
+}
+
 export function computePhysicalState(
   win: DesktopWindowData,
   isFocused: boolean,
@@ -87,11 +93,10 @@ export function computePhysicalState(
   }
 
   // 1. Heat calculation: High CPU or high RAM causes red-hot cast iron
-  // Combined thermal load: CPU% * 0.78 + (RAM_GB * 4.5), igniting at >= 54
-  const effectiveLoad = win.cpu * 0.78 + win.ramGb * 4.5;
+  const load = effectiveLoad(win.cpu, win.ramGb);
   let heatIntensity = 0;
-  if (effectiveLoad >= 54) {
-    heatIntensity = Math.min(1, (effectiveLoad - 54) / 42);
+  if (load >= HEAT_IGNITION_LOAD) {
+    heatIntensity = Math.min(1, (load - HEAT_IGNITION_LOAD) / 42);
   }
 
   // 2. Cobwebs calculation: Forms when unfocused > cobwebThresholdSeconds (default 2 hours = 7200s)

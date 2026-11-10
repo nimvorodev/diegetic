@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
   }
 
   ax_check_trust(true);
-  telemetry_init();
 
   if (!no_menu)
     cobweb_menubar_init();

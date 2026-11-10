@@ -1,6 +1,5 @@
 #include "telemetry.h"
 #include <libproc.h>
-#include <mach/mach_time.h>
 #include <math.h>
 #include <pthread.h>
 #include <string.h>
@@ -24,16 +23,7 @@ struct pid_sample {
 
 static struct pid_sample g_pid_cache[MAX_CACHED_PIDS];
 static int g_pid_cache_count = 0;
-static mach_timebase_info_data_t g_timebase = {1, 1};
 static pthread_mutex_t g_pid_lock = PTHREAD_MUTEX_INITIALIZER;
-
-void telemetry_init(void) {
-  mach_timebase_info(&g_timebase);
-}
-
-static uint64_t mach_to_ns(uint64_t mach_ticks) {
-  return (mach_ticks * g_timebase.numer) / g_timebase.denom;
-}
 
 static void query_pid_metrics(pid_t pid, float *out_cpu, float *out_ram_gb) {
   if (pid <= 0) {
@@ -44,14 +34,16 @@ static void query_pid_metrics(pid_t pid, float *out_cpu, float *out_ram_gb) {
 
   struct proc_taskinfo pti;
   int ret = proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti));
-  if (ret <= 0) {
+  if (ret < (int)sizeof(pti)) {
     *out_cpu = 0.0f;
     *out_ram_gb = 0.0f;
     return;
   }
 
   uint64_t now_ns = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-  uint64_t cpu_ns = mach_to_ns(pti.pti_total_user + pti.pti_total_system);
+  // pti_total_user / pti_total_system are already nanoseconds — do not
+  // re-apply the mach timebase (it inflated CPU ~41.7x on Intel Macs).
+  uint64_t cpu_ns = pti.pti_total_user + pti.pti_total_system;
   float ram_gb = (float)pti.pti_resident_size / (1024.0f * 1024.0f * 1024.0f);
 
   pthread_mutex_lock(&g_pid_lock);

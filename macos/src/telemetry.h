@@ -37,7 +37,6 @@ extern float g_cobweb_after_seconds; // default 7200s (2 hours)
 extern float g_border_width;         // default 14.0 pt
 extern enum diegetic_test_override g_test_override;
 
-void telemetry_init(void);
 void telemetry_sample_processes(void);
 void telemetry_on_focus_change(struct window_telemetry *wt, bool now_focused);
 void telemetry_trigger_brush(struct window_telemetry *wt);

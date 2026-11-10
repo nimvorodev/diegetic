@@ -359,7 +359,7 @@ Then open ~/Applications/Diegetic.app and guide me through enabling Accessibilit
                 <span>Kernel CPU &amp; RAM Sampling</span>
               </div>
               <p className="text-xs text-stone-600 leading-relaxed">
-                <code className="font-mono-telemetry text-[11px] bg-stone-100 px-1 rounded">src/telemetry.c</code> queries <code className="font-mono-telemetry text-[11px]">proc_pidinfo(pid, PROC_PIDTASKINFO, ...)</code> and <code className="font-mono-telemetry text-[11px]">mach_timebase_info</code> to compute real-time CPU% and physical RAM (<code className="font-mono-telemetry text-[11px]">pti_resident_size</code>), igniting red-hot cast-iron borders on heavy apps and frosting idle ones.
+                <code className="font-mono-telemetry text-[11px] bg-stone-100 px-1 rounded">src/telemetry.c</code> queries <code className="font-mono-telemetry text-[11px]">proc_pidinfo(pid, PROC_PIDTASKINFO, ...)</code> to compute real-time CPU% and physical RAM (<code className="font-mono-telemetry text-[11px]">pti_resident_size</code>), igniting red-hot cast-iron borders on heavy apps and frosting idle ones.
               </p>
             </div>
 

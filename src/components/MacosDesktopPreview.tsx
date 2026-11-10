@@ -22,7 +22,9 @@ import {
   DockerContainer,
   RenderStyle,
   computePhysicalState,
+  effectiveLoad,
   formatDuration,
+  HEAT_IGNITION_LOAD,
 } from '../types/desktop';
 import { WindowAuraCanvas } from './WindowAuraCanvas';
 import { soundEngine } from '../utils/soundEffects';
@@ -269,7 +271,7 @@ export const MacosDesktopPreview: React.FC = () => {
     setWindows((prev) =>
       prev.map((w) => {
         if (w.id === focusedId) return w;
-        const isHot = w.cpu * 0.78 + w.ramGb * 4.5 >= 54;
+        const isHot = effectiveLoad(w.cpu, w.ramGb) >= HEAT_IGNITION_LOAD;
         return {
           ...w,
           unfocusedSec: w.unfocusedSec + 7200,
@@ -303,7 +305,7 @@ export const MacosDesktopPreview: React.FC = () => {
     const cpu = Math.max(4, next.reduce((s, t) => s + t.cpu, 2));
     const ramGb = Number(Math.max(0.3, next.reduce((s, t) => s + t.ramMb, 200) / 1000).toFixed(1));
     setWindows((prev) => prev.map((w) => (w.id === 'chrome' ? { ...w, cpu, ramGb } : w)));
-    if (cpu < 55) {
+    if (effectiveLoad(cpu, ramGb) < HEAT_IGNITION_LOAD) {
       setStatusBanner('🧊 Chrome CPU/RAM dropped — cast-iron edges cooled down.');
     }
   };
@@ -323,7 +325,7 @@ export const MacosDesktopPreview: React.FC = () => {
     const running = next.filter((c) => c.running);
     const cpu = Math.min(98, Math.max(2.0, running.reduce((s, c) => s + c.cpu, 1.5)));
     const ramGb = Number(Math.max(0.4, running.reduce((s, c) => s + c.ramGb, 0.3)).toFixed(1));
-    if (cpu >= 55) {
+    if (effectiveLoad(cpu, ramGb) >= HEAT_IGNITION_LOAD) {
       soundEngine.playHeatSpike();
       setStatusBanner(
         `🔥 Docker Engine hit ${Math.round(cpu)}% CPU · ${ramGb} GB RAM — cast-iron frame ignited!`
